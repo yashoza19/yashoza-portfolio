@@ -33,3 +33,11 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# screenshots and temporary files
+*.png
+*.jpg
+*.jpeg
+.playwright-mcp/
+PROMPT.md
+tailwind.config.js
