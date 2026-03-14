@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import SmoothScroll from "@/components/layout/SmoothScroll";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import PageTransition from "@/components/layout/PageTransition";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,7 +41,11 @@ export default function RootLayout({
         <a href="#main-content" className="skip-to-content">
           Skip to content
         </a>
-        {children}
+        <SmoothScroll>
+          <Navbar />
+          <PageTransition>{children}</PageTransition>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );
