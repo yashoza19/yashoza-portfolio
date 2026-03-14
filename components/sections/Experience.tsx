@@ -68,7 +68,7 @@ export default function Experience() {
       className="section-container min-h-screen relative overflow-hidden"
     >
       <div className="w-full px-6 md:px-10">
-        <div className="max-w-10xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Section Heading */}
           <h2
             ref={headingRef}
