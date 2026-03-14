@@ -32,10 +32,10 @@ function ParticleField() {
       <PointMaterial
         transparent
         color="#f59e0b"
-        size={0.02}
+        size={0.015}
         sizeAttenuation={true}
         depthWrite={false}
-        opacity={0.6}
+        opacity={0.3}
       />
     </Points>
   );
@@ -48,9 +48,9 @@ function FloatingGeometry() {
     if (!meshRef.current) return;
 
     const time = state.clock.getElapsedTime();
-    meshRef.current.rotation.x = time * 0.2;
-    meshRef.current.rotation.y = time * 0.3;
-    meshRef.current.position.y = Math.sin(time * 0.5) * 0.3;
+    meshRef.current.rotation.x = time * 0.1;
+    meshRef.current.rotation.y = time * 0.15;
+    meshRef.current.position.y = Math.sin(time * 0.3) * 0.2;
   });
 
   return (
@@ -60,7 +60,7 @@ function FloatingGeometry() {
         color="#f59e0b"
         wireframe
         transparent
-        opacity={0.1}
+        opacity={0.05}
       />
     </mesh>
   );

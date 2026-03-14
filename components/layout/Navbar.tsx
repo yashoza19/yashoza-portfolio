@@ -46,12 +46,20 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="flex items-center justify-between h-20 md:h-24">
-          {/* Logo */}
+          {/* Logo - Creative design */}
           <Link
             href="/"
-            className="text-display text-xl md:text-2xl font-bold tracking-tight hover:text-[var(--color-accent)] transition-colors duration-300"
+            className="group flex items-center gap-2 text-display text-xl md:text-2xl font-bold tracking-tight"
           >
-            YO
+            <span className="relative">
+              <span className="text-[var(--color-text)] group-hover:text-[var(--color-accent)] transition-colors duration-300">
+                Y
+              </span>
+              <span className="text-[var(--color-accent)] group-hover:text-[var(--color-text)] transition-colors duration-300">
+                O
+              </span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[var(--color-accent)] group-hover:w-full transition-all duration-500" />
+            </span>
           </Link>
 
           {/* Navigation Links */}

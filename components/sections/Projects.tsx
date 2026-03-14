@@ -151,22 +151,35 @@ function ProjectCard({ project }: ProjectCardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Project Image */}
-      <div className="relative aspect-video overflow-hidden bg-[var(--color-border)]">
+      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-[var(--color-border)] to-[var(--color-background)]">
         <div
           ref={imageRef}
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 flex items-center justify-center transition-transform duration-700 ease-out"
+          style={{
+            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+          }}
         >
-          {/* Placeholder since images don't exist yet */}
-          <div className="w-full h-full bg-gradient-to-br from-[var(--color-accent)]/20 to-[var(--color-accent)]/5 flex items-center justify-center">
-            <p className="text-display text-6xl font-bold text-[var(--color-accent)]/20">
-              {project.title[0]}
-            </p>
+          {/* Modern geometric placeholder */}
+          <div className="w-full h-full relative">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/10 via-transparent to-[var(--color-accent)]/5" />
+
+            {/* Geometric shapes */}
+            <div className="absolute top-1/4 left-1/4 w-24 h-24 border border-[var(--color-accent)]/20 rounded-lg rotate-12" />
+            <div className="absolute bottom-1/4 right-1/4 w-32 h-32 border border-[var(--color-accent)]/10 rounded-full" />
+
+            {/* Project initial */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-display text-7xl font-bold text-[var(--color-accent)]/30">
+                {project.title[0]}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Overlay on hover */}
+        {/* Color overlay on hover */}
         <div
-          className={`absolute inset-0 bg-[var(--color-accent)]/10 transition-opacity duration-500 ${
+          className={`absolute inset-0 bg-gradient-to-t from-[var(--color-accent)]/20 to-transparent transition-opacity duration-500 ${
             isHovered ? "opacity-100" : "opacity-0"
           }`}
         />
