@@ -1,4 +1,5 @@
 import Hero from "@/components/sections/Hero";
+import About from "@/components/sections/About";
 
 export default function Home() {
   return (
@@ -6,10 +7,8 @@ export default function Home() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Temporary sections to test scrolling */}
-      <section id="about" className="min-h-screen flex items-center justify-center bg-[var(--color-border)]">
-        <h2 className="text-display text-4xl">About Section</h2>
-      </section>
+      {/* About Section */}
+      <About />
 
       <section id="experience" className="min-h-screen flex items-center justify-center">
         <h2 className="text-display text-4xl">Experience Section</h2>
