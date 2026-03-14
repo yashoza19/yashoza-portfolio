@@ -415,6 +415,32 @@ Branch naming convention:
 - `fix/responsive-navbar` - Bug fixes
 - `chore/update-dependencies` - Maintenance
 
+### Pull Request Guidelines
+
+**CRITICAL: NO Claude Attribution**
+- NEVER include "Generated with Claude Code" or any similar attribution in PR descriptions
+- NEVER include emojis or checkmark icons in PR descriptions
+- Keep PR descriptions professional and concise
+- Focus on what was changed and why
+- Include a test plan section
+
+PR description template:
+```
+## Summary
+- List of changes made
+- One item per line
+
+## Configuration (if applicable)
+Key settings or decisions
+
+## Next Steps
+What comes after this PR
+
+## Test Plan
+- How to verify the changes work
+- Steps taken to test
+```
+
 ---
 
 ## Deployment & Publishing
