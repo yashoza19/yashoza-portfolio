@@ -105,18 +105,18 @@ export default function About() {
       ref={sectionRef}
       className="section-container min-h-screen flex items-center"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
+      <div className="max-w-5xl mx-auto px-6 md:px-12 w-full">
         {/* Section Heading */}
         <h2
           ref={headingRef}
-          className="text-display text-5xl md:text-6xl lg:text-7xl font-bold mb-16 md:mb-24"
+          className="text-display text-5xl md:text-6xl lg:text-7xl font-bold mb-16 md:mb-24 text-center"
         >
           About
         </h2>
 
-        {/* Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Text Content */}
+        {/* Two-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Left: Text Content */}
           <div className="space-y-6">
             <p
               ref={(el) => {
@@ -153,10 +153,10 @@ export default function About() {
             </p>
           </div>
 
-          {/* Visual Element */}
+          {/* Right: Visual Element */}
           <div
             ref={visualRef}
-            className="relative aspect-square lg:aspect-auto lg:h-[500px]"
+            className="relative w-full aspect-square"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/20 to-transparent rounded-lg">
               <div className="absolute inset-4 border-2 border-[var(--color-accent)]/30 rounded-lg" />
