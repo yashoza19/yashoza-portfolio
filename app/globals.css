@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/* CSS Variables for the Cinematic Dark Theme */
+:root {
+  /* Color Palette - Cinematic Minimalism */
+  --color-background: #0a0a0a;
+  --color-text: #f0ece2;
+  --color-accent: #f59e0b; /* Electric amber - change to #f43f5e for vivid coral */
+  --color-muted: #6b6b6b;
+  --color-border: #1a1a1a;
+
+  /* Typography Scale */
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+
+  /* Spacing */
+  --section-padding: clamp(4rem, 12vw, 8rem);
+
+  /* Animation Easings - Cinematic */
+  --ease-power3: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  --ease-expo: cubic-bezier(0.190, 1.000, 0.220, 1.000);
+
+  /* Z-index layers */
+  --z-background: -1;
+  --z-content: 1;
+  --z-nav: 100;
+  --z-overlay: 200;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-background);
+}
+
+/* Smooth scrolling with Lenis */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Focus Indicators - Accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--color-accent);
+  color: var(--color-background);
+  padding: 1rem 2rem;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: var(--z-overlay);
+  transition: top 0.2s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* Typography Utilities */
+.text-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.text-body {
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Section Container */
+.section-container {
+  padding: var(--section-padding) 0;
+}
+
+/* Magnetic Effect Base */
+.magnetic {
+  transition: transform 0.4s var(--ease-power3);
+}
