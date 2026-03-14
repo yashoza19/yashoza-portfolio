@@ -56,8 +56,8 @@ export default function TextReveal({
   const chars = text.split("").map((char, index) => (
     <span
       key={index}
-      className="char inline-block"
-      style={{ opacity: 0 }}
+      className="char"
+      style={{ opacity: 0, display: "inline" }}
     >
       {char === " " ? "\u00A0" : char}
     </span>

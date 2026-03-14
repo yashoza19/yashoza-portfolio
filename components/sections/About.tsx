@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
-import { SITE_CONFIG, STATS } from "@/lib/constants";
+import { STATS } from "@/lib/constants";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -154,27 +154,30 @@ export default function About() {
             </p>
           </div>
 
-          {/* Right: Visual Element */}
+          {/* Right: Visual Element - Subtle geometric pattern */}
           <div
             ref={visualRef}
-            className="relative w-full aspect-square"
+            className="relative w-full aspect-square max-w-md mx-auto lg:max-w-none"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/20 to-transparent rounded-lg">
-              <div className="absolute inset-4 border-2 border-[var(--color-accent)]/30 rounded-lg" />
-              <div className="absolute inset-8 border border-[var(--color-accent)]/20 rounded-lg" />
-
-              {/* Decorative Elements */}
-              <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-[var(--color-accent)] rounded-full animate-pulse" />
-              <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-[var(--color-accent)] rounded-full animate-pulse delay-150" />
-              <div className="absolute top-1/2 right-1/3 w-4 h-4 border-2 border-[var(--color-accent)] rounded-full" />
-
-              {/* Center Text */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-display text-8xl md:text-9xl font-bold text-[var(--color-accent)]/10">
-                    {SITE_CONFIG.name.split(" ")[0][0]}
-                  </p>
-                </div>
+            {/* Minimal geometric pattern */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-40">
+              <div className="relative w-48 h-48 md:w-64 md:h-64">
+                {/* Subtle rotating square */}
+                <div
+                  className="absolute inset-0 border border-[var(--color-accent)]/20 rounded-lg"
+                  style={{
+                    animation: "rotate 20s linear infinite",
+                  }}
+                />
+                {/* Subtle inner square */}
+                <div
+                  className="absolute inset-8 border border-[var(--color-accent)]/10 rounded-lg"
+                  style={{
+                    animation: "rotate 30s linear infinite reverse",
+                  }}
+                />
+                {/* Center accent dot */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-[var(--color-accent)]/30 rounded-full" />
               </div>
             </div>
           </div>
