@@ -3,6 +3,7 @@ import About from "@/components/sections/About";
 import Experience from "@/components/sections/Experience";
 import Projects from "@/components/sections/Projects";
 import Skills from "@/components/sections/Skills";
+import Contact from "@/components/sections/Contact";
 
 export default function Home() {
   return (
@@ -22,9 +23,8 @@ export default function Home() {
       {/* Skills Section */}
       <Skills />
 
-      <section id="contact" className="min-h-screen flex items-center justify-center bg-[var(--color-border)]">
-        <h2 className="text-display text-4xl">Contact Section</h2>
-      </section>
+      {/* Contact Section */}
+      <Contact />
     </main>
   );
 }

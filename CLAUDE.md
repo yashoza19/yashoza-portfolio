@@ -299,6 +299,195 @@ export const SKILLS = {
 
 ---
 
+## Visual QA — Browser MCP (REQUIRED)
+
+Claude Code cannot see the rendered website by default. A Browser MCP server is **required** so Claude Code can open the site in a real browser, take screenshots, scroll, interact, and verify that design, animations, and layout actually look correct.
+
+### Setup — Choose One
+
+**Option A: Playwright MCP (Recommended — easiest setup)**
+
+```bash
+claude mcp add playwright -- npx @playwright/mcp@latest
+```
+
+Or add to `~/.claude/settings.json`:
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  }
+}
+```
+
+Capabilities: `browser_navigate`, `browser_snapshot`, `browser_take_screenshot`, `browser_click`, `browser_scroll`, viewport resizing for responsive testing.
+
+**Option B: Chrome DevTools MCP (More powerful — console, network, performance)**
+
+1. **QUIT Chrome completely first** (Cmd+Q on macOS, or close all windows). Chrome must be launched fresh with the debugging flag — you cannot add it to an already-running instance.
+
+2. Launch Chrome with remote debugging:
+```bash
+# macOS (IMPORTANT: use this exact path, NOT "google-chrome")
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+
+# Linux
+google-chrome --remote-debugging-port=9222
+
+# Windows
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+```
+
+3. Add the MCP server (skip if already added):
+```bash
+claude mcp add chrome-devtools -- npx -y @anthropic-ai/mcp-server-chrome-devtools
+```
+
+4. **Restart Claude Code** after Chrome is running with debugging enabled.
+
+**Troubleshooting:**
+- `zsh: command not found: google-chrome` → You're on macOS. Use the full `/Applications/...` path above.
+- `MCP server chrome-devtools already exists` → The server is already registered. Just make sure Chrome is running with `--remote-debugging-port=9222` and restart Claude Code.
+- MCP connects but tools fail → Quit Chrome, relaunch with the flag, restart Claude Code.
+- If all else fails, use **Option A (Playwright MCP)** instead — it's self-contained and doesn't need Chrome launched separately.
+
+Or add to `~/.claude/settings.json`:
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-chrome-devtools"]
+    }
+  }
+}
+```
+
+Additional capabilities: real-time console error monitoring, network request inspection, performance traces, Core Web Vitals measurement, full DOM inspection.
+
+### Visual QA Protocol — Run After EVERY Phase (NON-NEGOTIABLE)
+
+**CRITICAL: Do NOT skip visual QA. Do NOT commit without visual verification.**
+
+If the Browser MCP is available, use it. If the Browser MCP is NOT available or fails to connect:
+1. **STOP and tell the user** — say: "Browser MCP is not connected. I cannot verify the design visually. Please set it up before I continue."
+2. **Do NOT commit, push, or create a PR.** Wait for the user to either fix the MCP connection or explicitly tell you to proceed without visual QA.
+3. **Never say "I'll skip visual QA for now" or "I'll proceed without visual verification."** The whole point of this project is that the design must look correct. Blind commits produce broken designs.
+
+**When the Browser MCP IS available**, after completing each phase and before committing:
+
+1. Ensure the dev server is running (`pnpm dev`)
+2. Use the Browser MCP to navigate to `http://localhost:3000`
+3. Take a full-page screenshot at **desktop (1440px)**, **tablet (768px)**, and **mobile (375px)**
+4. Scroll through the entire page slowly, taking a screenshot of each section
+5. Check for console errors and warnings
+6. Test hover states on interactive elements (buttons, project cards, nav links)
+7. Verify scroll-triggered GSAP animations fire correctly by scrolling into each section
+8. Compare what is rendered against the design spec in this file
+9. **Fix any visual issues found before proceeding**
+10. Only after ALL issues are resolved: commit, push, and create PR
+
+### Visual QA Checklist
+
+Use this checklist at each phase. Claude Code should verify each item visually:
+
+**Global**
+- [ ] Background is `#0a0a0a` (near-black), no white flashes on load or route change
+- [ ] Text color is `#f0ece2` (warm off-white), not pure white
+- [ ] Accent color is consistent throughout (amber or coral, not both)
+- [ ] Display font is distinctive (NOT Inter, Roboto, Arial, or system fonts for headings)
+- [ ] Body font is clean and readable at 16px+
+- [ ] No horizontal overflow at any breakpoint
+- [ ] Smooth scrolling via Lenis is active
+
+**Hero Section**
+- [ ] Name text is 120px+ on desktop, scales down appropriately on mobile
+- [ ] GSAP character stagger animation plays on page load
+- [ ] Three.js background element is visible but subtle — not distracting
+- [ ] Scroll indicator is visible and fades on scroll
+- [ ] Full viewport height, no content cut off
+
+**About Section**
+- [ ] Asymmetric split layout (not centered or symmetric)
+- [ ] Text reveals on scroll via ScrollTrigger
+- [ ] Counter animations count up when scrolled into view
+- [ ] Generous whitespace, not cramped
+
+**Experience Section**
+- [ ] Timeline or horizontal scroll is functional
+- [ ] Progressive reveal works as user scrolls
+- [ ] If pinned horizontal scroll: pin engages and releases cleanly
+- [ ] Content is readable and properly spaced
+
+**Projects Section**
+- [ ] Project cards have hover effects (parallax tilt, color shift, image zoom)
+- [ ] GSAP stagger animation triggers on scroll entry
+- [ ] Tech stack tags are visible and styled
+- [ ] Links to live/repo are functional
+
+**Skills Section**
+- [ ] NOT a flat grid of logos — uses creative visualization
+- [ ] Motion/animation is present and purposeful
+- [ ] Categories are visually distinct
+
+**Blog Preview Section**
+- [ ] Shows latest 3 posts with title, date, excerpt, reading time
+- [ ] "View all posts →" link navigates to `/blog`
+- [ ] Cards match overall dark aesthetic
+
+**Contact Section**
+- [ ] Large CTA text is prominent
+- [ ] Contact form fields are styled and functional
+- [ ] Social links have magnetic hover effect
+- [ ] Links are clickable and correctly targeted
+
+**Blog Pages**
+- [ ] `/blog` listing page renders with all published posts
+- [ ] Tag filtering works with animation
+- [ ] `/blog/[slug]` renders MDX content correctly
+- [ ] Code blocks have syntax highlighting and copy button
+- [ ] Reading progress bar works
+- [ ] Table of contents generates from headings
+- [ ] Previous/Next navigation links work
+- [ ] Max-width ~720px for reading content
+
+**Responsive**
+- [ ] At 375px: everything stacks, no horizontal scroll, text is readable
+- [ ] At 768px: layout adapts, grid shifts to fewer columns
+- [ ] At 1440px: full layout with generous whitespace
+- [ ] Navigation works at all breakpoints
+
+**Performance**
+- [ ] No console errors or warnings
+- [ ] Three.js does not cause jank or frame drops
+- [ ] Page load feels fast (no visible layout shifts)
+- [ ] Images are not oversized or missing
+
+### QA Prompt — Copy/Paste After Each Phase
+
+Use this prompt to tell Claude Code to run a full visual review:
+
+```
+Use the browser MCP to visually QA http://localhost:3000. Do the following:
+
+1. Navigate to the site and take a desktop screenshot (1440px wide)
+2. Slowly scroll from top to bottom, pausing at each section. Take a screenshot of each section.
+3. Check every item in the Visual QA Checklist from CLAUDE.md
+4. Resize to 768px and take a full-page screenshot
+5. Resize to 375px and take a full-page screenshot
+6. Check for any console errors
+7. Test hover effects on buttons, project cards, and navigation links
+8. Navigate to /blog and take a screenshot
+9. Navigate to a blog post and take a screenshot
+
+Report what passes, what fails, and fix all failures before we proceed.
+```
+
+---
+
 ## Git Configuration & Version Control
 
 ### CRITICAL: Authorship Rules
@@ -512,22 +701,22 @@ pnpm start        # Preview production build
 
 ## Implementation Order
 
-Follow this order to build incrementally:
+Follow this order to build incrementally. **Run the Visual QA Protocol after each step before creating a PR.**
 
 0. **Git Init**: Initialize repo, set user config, create remote, first commit
-1. **Scaffold**: `create-next-app` with TypeScript + Tailwind + App Router
-2. **Globals**: Fonts, CSS variables, color palette, Tailwind config
-3. **Layout**: Root layout, Navbar, Footer, SmoothScroll provider
-4. **Hero section**: Display text + GSAP animations + Three.js background
-5. **About section**: Content + scroll reveal animations
-6. **Experience section**: Timeline + horizontal scroll
-7. **Projects section**: Grid + hover effects
-8. **Skills section**: Creative visualization
-9. **Contact section**: Form + social links
-10. **Blog system**: MDX setup, listing page, post page, components
-11. **Blog preview section**: On home page
-12. **Page transitions**: Framer Motion AnimatePresence
-13. **Polish**: Responsive, a11y, performance, SEO meta tags
+1. **Scaffold**: `create-next-app` with TypeScript + Tailwind + App Router → **Visual QA: verify dark background, fonts load**
+2. **Globals**: Fonts, CSS variables, color palette, Tailwind config → **Visual QA: verify typography and colors**
+3. **Layout**: Root layout, Navbar, Footer, SmoothScroll provider → **Visual QA: verify nav, footer, smooth scroll**
+4. **Hero section**: Display text + GSAP animations + Three.js background → **Visual QA: verify animation timing, 3D subtlety, text size**
+5. **About section**: Content + scroll reveal animations → **Visual QA: verify scroll triggers, layout asymmetry**
+6. **Experience section**: Timeline + horizontal scroll → **Visual QA: verify pin/unpin, progressive reveal**
+7. **Projects section**: Grid + hover effects → **Visual QA: verify hover states, stagger animation**
+8. **Skills section**: Creative visualization → **Visual QA: verify it's NOT a logo grid, motion works**
+9. **Contact section**: Form + social links → **Visual QA: verify form, magnetic hover, CTA prominence**
+10. **Blog system**: MDX setup, listing page, post page, components → **Visual QA: verify listing, post rendering, code highlighting**
+11. **Blog preview section**: On home page → **Visual QA: verify latest 3 posts appear, links work**
+12. **Page transitions**: Framer Motion AnimatePresence → **Visual QA: verify transitions between / and /blog**
+13. **Polish**: Responsive, a11y, performance, SEO meta tags → **Visual QA: full responsive pass at 375px, 768px, 1440px**
 14. **Content**: Replace placeholder data with real content
 
 ---
@@ -542,3 +731,6 @@ Follow this order to build incrementally:
 - Blog is a first-class feature, not an afterthought. The reading experience should be excellent.
 - All data is centralized in `/lib/constants.ts` for easy customization.
 - Use `placeholder` content with clear TODO comments where personal data needs to be filled in.
+- **After every phase, use the Browser MCP to visually verify the output.** Do NOT commit, push, or create a PR until the current phase looks correct visually.
+- **All work on feature branches with PRs. Never commit directly to main.**
+- **No Claude attribution anywhere — not in commits, not in PR descriptions, not in code comments.**
