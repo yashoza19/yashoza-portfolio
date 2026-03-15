@@ -2,31 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import readingTime from 'reading-time';
+import type { BlogPost, BlogPostMeta } from './blog-types';
 
 const BLOG_DIR = path.join(process.cwd(), 'content', 'blog');
 
-export interface BlogPost {
-  slug: string;
-  title: string;
-  date: string;
-  description: string;
-  tags: string[];
-  published: boolean;
-  readingTime: string;
-  coverImage?: string;
-  content: string;
-}
-
-export interface BlogPostMeta {
-  slug: string;
-  title: string;
-  date: string;
-  description: string;
-  tags: string[];
-  published: boolean;
-  readingTime: string;
-  coverImage?: string;
-}
+// Re-export types
+export type { BlogPost, BlogPostMeta } from './blog-types';
 
 /**
  * Get all blog posts sorted by date (newest first)
@@ -143,14 +124,5 @@ export function getAdjacentPosts(slug: string): {
   };
 }
 
-/**
- * Format date to readable string
- */
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+// formatDate is now exported from blog-types.ts
+export { formatDate } from './blog-types';
