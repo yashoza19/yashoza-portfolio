@@ -1,0 +1,198 @@
+---
+title: "Advanced TypeScript Patterns for Scalable Applications"
+date: "2026-01-20"
+description: "Explore advanced TypeScript patterns including conditional types, template literals, and type guards that make your code more robust and maintainable."
+tags: ["typescript", "javascript", "webdev"]
+published: true
+---
+
+TypeScript has evolved into a powerful tool for building type-safe applications. Beyond basic type annotations, TypeScript offers advanced patterns that can dramatically improve code quality and developer experience.
+
+## Conditional Types
+
+Conditional types allow you to create types that change based on conditions:
+
+```typescript
+type IsString<T> = T extends string ? true : false;
+
+type A = IsString<string>;  // true
+type B = IsString<number>;  // false
+```
+
+A practical example is creating a type-safe event emitter:
+
+```typescript
+type EventMap = {
+  'user:login': { userId: string; timestamp: number };
+  'user:logout': { userId: string };
+  'data:update': { id: string; data: unknown };
+};
+
+type EventCallback<T extends keyof EventMap> = (
+  payload: EventMap[T]
+) => void;
+
+class TypedEventEmitter {
+  on<K extends keyof EventMap>(
+    event: K,
+    callback: EventCallback<K>
+  ) {
+    // Implementation
+  }
+
+  emit<K extends keyof EventMap>(
+    event: K,
+    payload: EventMap[K]
+  ) {
+    // Implementation
+  }
+}
+```
+
+## Template Literal Types
+
+Template literal types let you manipulate string types:
+
+```typescript
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type Endpoint = 'users' | 'posts' | 'comments';
+
+type APIRoute = `/${Lowercase<Endpoint>}`;
+// type APIRoute = "/users" | "/posts" | "/comments"
+
+type APIMethod = `${HTTPMethod} /${Endpoint}`;
+// type APIMethod = "GET /users" | "POST /users" | ...
+```
+
+<Callout type="info" title="Type Safety at Scale">
+Template literal types are perfect for enforcing naming conventions and creating type-safe APIs at compile time.
+</Callout>
+
+## Discriminated Unions
+
+Discriminated unions (or tagged unions) provide exhaustive type checking:
+
+```typescript
+type Success<T> = {
+  status: 'success';
+  data: T;
+};
+
+type Error = {
+  status: 'error';
+  error: string;
+};
+
+type Loading = {
+  status: 'loading';
+};
+
+type AsyncState<T> = Success<T> | Error | Loading;
+
+function handleState<T>(state: AsyncState<T>) {
+  switch (state.status) {
+    case 'success':
+      // TypeScript knows state.data exists here
+      return state.data;
+    case 'error':
+      // TypeScript knows state.error exists here
+      throw new Error(state.error);
+    case 'loading':
+      return null;
+    // No default needed - TypeScript ensures all cases are handled
+  }
+}
+```
+
+## Type Guards
+
+Type guards narrow down types at runtime:
+
+```typescript
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function processValue(value: unknown) {
+  if (isString(value)) {
+    // TypeScript knows value is string here
+    console.log(value.toUpperCase());
+  }
+}
+```
+
+Custom type guards for complex objects:
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+function isUser(obj: unknown): obj is User {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'name' in obj &&
+    'email' in obj &&
+    typeof (obj as User).id === 'string' &&
+    typeof (obj as User).name === 'string' &&
+    typeof (obj as User).email === 'string'
+  );
+}
+```
+
+## Mapped Types
+
+Mapped types transform existing types:
+
+```typescript
+type Optional<T> = {
+  [K in keyof T]?: T[K];
+};
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+type PartialUser = Optional<User>;
+// { id?: string; name?: string; email?: string; }
+```
+
+A practical example for API responses:
+
+```typescript
+type APIResponse<T> = {
+  [K in keyof T]: {
+    value: T[K];
+    loading: boolean;
+    error: string | null;
+  };
+};
+
+type UserData = {
+  profile: User;
+  posts: Post[];
+};
+
+type UserDataState = APIResponse<UserData>;
+// {
+//   profile: { value: User; loading: boolean; error: string | null };
+//   posts: { value: Post[]; loading: boolean; error: string | null };
+// }
+```
+
+## Conclusion
+
+These advanced TypeScript patterns enable you to:
+
+- Build more robust APIs with better type safety
+- Catch errors at compile time instead of runtime
+- Improve developer experience with better autocomplete
+- Document your code's behavior through types
+
+Start incorporating these patterns gradually into your codebase. The initial investment in learning pays dividends in reduced bugs and improved maintainability.
