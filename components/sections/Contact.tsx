@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { track } from "@vercel/analytics";
 import { SITE_CONFIG, FOOTER_LINKS } from "@/lib/constants";
 import MagneticButton from "@/components/ui/MagneticButton";
 
@@ -62,15 +63,55 @@ export default function Contact() {
     e.preventDefault();
     setFormStatus("submitting");
 
-    // TODO: Replace with actual form service (Formspree/Web3Forms) endpoint
-    // For now, just simulate success
-    setTimeout(() => {
-      setFormStatus("success");
-      if (formRef.current) {
-        formRef.current.reset();
+    const formData = new FormData(e.currentTarget);
+
+    // Honeypot check - if this field is filled, it's a bot
+    if (formData.get("botcheck")) {
+      setFormStatus("error");
+      return;
+    }
+
+    const data = {
+      access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY,
+      subject: `New Portfolio Contact: ${formData.get("name")}`,
+      from_name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+      replyto: formData.get("email"),
+    };
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setFormStatus("success");
+
+        // Track successful form submission
+        track("contact_form_submitted", {
+          name: formData.get("name") as string,
+        });
+
+        if (formRef.current) {
+          formRef.current.reset();
+        }
+        setTimeout(() => setFormStatus("idle"), 5000);
+      } else {
+        setFormStatus("error");
+        setTimeout(() => setFormStatus("idle"), 5000);
       }
-      setTimeout(() => setFormStatus("idle"), 3000);
-    }, 1500);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      setFormStatus("error");
+      setTimeout(() => setFormStatus("idle"), 5000);
+    }
   };
 
   return (
@@ -154,6 +195,16 @@ export default function Contact() {
                 />
               </div>
 
+              {/* Honeypot field - hidden from users, catches bots */}
+              <input
+                type="checkbox"
+                name="botcheck"
+                className="hidden"
+                style={{ display: "none" }}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+
               <MagneticButton
                 type="submit"
                 className="w-full px-8 py-4 bg-[var(--color-accent)] text-[var(--color-background)] font-bold text-lg rounded-lg hover:bg-[var(--color-accent)]/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -165,6 +216,12 @@ export default function Contact() {
                   ? "Message Sent!"
                   : "Send Message"}
               </MagneticButton>
+
+              {formStatus === "success" && (
+                <p className="text-[var(--color-accent)] text-sm text-center">
+                  Thanks for reaching out! I'll get back to you soon.
+                </p>
+              )}
 
               {formStatus === "error" && (
                 <p className="text-red-500 text-sm text-center">
@@ -310,12 +367,17 @@ function CalendlyButton({ href }: { href: string }) {
     };
   }, []);
 
+  const handleClick = () => {
+    track("calendly_clicked");
+  };
+
   return (
     <a
       ref={buttonRef}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       className="inline-block w-full px-8 py-4 bg-[var(--color-accent)] text-[var(--color-background)] font-bold text-lg rounded-lg hover:bg-[var(--color-accent)]/90 transition-colors duration-300 text-center"
     >
       Book a Call
