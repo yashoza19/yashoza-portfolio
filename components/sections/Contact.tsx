@@ -86,12 +86,13 @@ export default function Contact() {
             ref={headingRef}
             className="text-display text-5xl md:text-7xl lg:text-8xl font-bold mb-8 text-center max-w-4xl mx-auto leading-tight"
           >
-            Let's work{" "}
-            <span className="text-[var(--color-accent)]">together</span>
+            Let's chat over{" "}
+            <span className="text-[var(--color-accent)]">coffee</span>
           </h2>
 
           <p className="text-center text-lg md:text-xl text-[var(--color-muted)] mb-16 max-w-2xl mx-auto">
-            Have a project in mind? Let's create something extraordinary.
+            Whether you want to talk infrastructure, open source, or just geek
+            out about Kubernetes — I'm always up for a conversation.
           </p>
 
           {/* Contact Form and Social Links */}
@@ -184,14 +185,30 @@ export default function Contact() {
                 ))}
               </div>
 
-              <div className="mt-12 pt-8 border-t border-[var(--color-border)]">
-                <p className="text-[var(--color-muted)] mb-2">Email</p>
-                <a
-                  href={`mailto:${SITE_CONFIG.email}`}
-                  className="text-lg text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors duration-300"
-                >
-                  {SITE_CONFIG.email}
-                </a>
+              <div className="mt-12 pt-8 border-t border-[var(--color-border)] space-y-6">
+                <div>
+                  <p className="text-[var(--color-muted)] mb-2">Email</p>
+                  <a
+                    href={`mailto:${SITE_CONFIG.email}`}
+                    className="text-lg text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors duration-300"
+                  >
+                    {SITE_CONFIG.email}
+                  </a>
+                </div>
+
+                <div>
+                  <p className="text-[var(--color-muted)] mb-2">Phone</p>
+                  <a
+                    href={`tel:${SITE_CONFIG.phone}`}
+                    className="text-lg text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors duration-300"
+                  >
+                    {SITE_CONFIG.phone}
+                  </a>
+                </div>
+
+                <div className="pt-4">
+                  <CalendlyButton href={SITE_CONFIG.social.calendly} />
+                </div>
               </div>
             </div>
           </div>
@@ -251,6 +268,57 @@ function SocialLink({ link }: { link: { label: string; href: string } }) {
       <span className="transform group-hover:translate-x-2 transition-transform duration-300">
         →
       </span>
+    </a>
+  );
+}
+
+function CalendlyButton({ href }: { href: string }) {
+  const buttonRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      gsap.to(button, {
+        x: x * 0.4,
+        y: y * 0.4,
+        duration: 0.4,
+        ease: "power3.out",
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(button, {
+        x: 0,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+      });
+    };
+
+    button.addEventListener("mousemove", handleMouseMove);
+    button.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      button.removeEventListener("mousemove", handleMouseMove);
+      button.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <a
+      ref={buttonRef}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-block w-full px-8 py-4 bg-[var(--color-accent)] text-[var(--color-background)] font-bold text-lg rounded-lg hover:bg-[var(--color-accent)]/90 transition-colors duration-300 text-center"
+    >
+      Book a Call
     </a>
   );
 }

@@ -1,135 +1,232 @@
 // ============================================================================
 // SITE CONFIGURATION
 // ============================================================================
-// TODO: Update all placeholder data with real information
 
 export const SITE_CONFIG = {
-  name: "Yash Oza", // TODO: Verify name
-  role: "Full Stack Developer", // TODO: Update with actual role
-  tagline: "I build experiences that live on the web.", // TODO: Write custom tagline
-  email: "yoyashoza@gmail.com",
-  location: "City, Country", // TODO: Add location
+  name: "Yash Oza",
+  role: "Senior DevOps & Software Engineer",
+  tagline: "I architect the infrastructure that lets engineering teams ship fast and sleep well.",
+  email: "yashdoza19@gmail.com",
+  phone: "(857) 891-7250",
+  location: "Boston, MA",
   social: {
     github: "https://github.com/yashoza19",
-    linkedin: "https://linkedin.com/in/yourusername", // TODO: Add LinkedIn
-    twitter: "https://twitter.com/yourusername", // TODO: Add Twitter or remove
+    linkedin: "https://linkedin.com/in/yashoza19",
+    twitter: "https://x.com/yashdoza",
+    calendly: "https://calendly.com/yashdoza19/15min",
   },
-  resume: "/resume.pdf", // TODO: Add resume PDF to /public
+  resume: "/resume.pdf",
 };
 
 // ============================================================================
 // WORK EXPERIENCE
 // ============================================================================
-// TODO: Add real work experience
 
 export const EXPERIENCES = [
   {
-    company: "Company Name", // TODO: Add company
-    role: "Senior Developer", // TODO: Add role
-    period: "2024 – Present", // TODO: Add dates
-    description: "Brief description of the role and responsibilities.", // TODO: Add description
+    company: "Red Hat, Inc.",
+    role: "Senior Software Engineer",
+    period: "April 2021 – Present",
+    description: "Application Infrastructure & Developer Platform Engineering",
     highlights: [
-      "Key achievement or project #1", // TODO: Add real achievements
-      "Key achievement or project #2",
-      "Key achievement or project #3",
+      "Designed containerized RAG pipelines, LLM-based agents, and transaction monitoring systems on multi-cluster Kubernetes/OpenShift with Kafka-based event streaming — 10+ production-ready reference architectures adopted by external teams",
+      "Reduced certification pipeline failure remediation time by 40%, ensuring SLA compliance for 100+ partner certifications via CI/CD automation with Jenkins and GitHub Actions",
+      "Built Terraform-based IaC templates and deployment guardrails for multi-cluster OpenShift provisioning — zero rollback incidents in partner environments",
+      "Mentored 15+ engineers and ISV partners on Kubernetes architecture, container networking, service mesh (Istio), and network policy design",
+      "Drove the technical roadmap for OpenShift Preflight certification tooling, validating container images and Kubernetes operators against Red Hat compliance standards",
+      "Cut partner infrastructure onboarding time by 50% by automating multi-cluster setup with Terraform, Ansible, and reusable CloudFormation stacks across AWS",
+      "Debugged overlay networking issues, service mesh misconfigurations, and inter-cluster communication patterns in high-availability production environments",
     ],
   },
   {
-    company: "Previous Company", // TODO: Add company
-    role: "Full Stack Developer",
-    period: "2022 – 2024",
-    description: "Built and maintained web applications.",
+    company: "CTNI, Northeastern University",
+    role: "Graduate Research Assistant (DevOps Lead)",
+    period: "Dec 2020 – Mar 2021",
+    description: "Cloud infrastructure and CI/CD for clinical research platform",
     highlights: [
-      "Developed features used by X users",
-      "Improved performance by X%",
-      "Led migration to new tech stack",
+      "Architected a production-ready MRI management platform on AWS with 99.9% uptime using version-controlled CloudFormation and AWS CLI automation",
+      "Achieved zero-downtime deployments by containerizing React/Flask services with Docker on auto-scaling ECS behind Application Load Balancers",
+      "Reduced release cycle from days to under 30 minutes with end-to-end AWS CodePipeline CI/CD",
     ],
   },
-  // TODO: Add more experiences as needed
+  {
+    company: "Ribbon Communications",
+    role: "Software Engineer Intern (DevOps)",
+    period: "Sep 2019 – Dec 2019",
+    description: "CI/CD optimization and infrastructure automation",
+    highlights: [
+      "Improved real-time monitoring response time by 80% by replacing monolithic scripts with a microservices architecture",
+      "Reduced JFrog Artifactory storage consumption by 10% via automated Jenkins pipelines for artifact cleanup",
+      "Automated version documentation for 200+ VMs with Python scripts integrated into Jenkins, published to Confluence",
+    ],
+  },
 ];
 
 // ============================================================================
 // PROJECTS
 // ============================================================================
-// TODO: Add real projects with actual images
 
 export const PROJECTS = [
   {
-    title: "Project Name", // TODO: Add project
-    description: "A brief description of what this project does and the problem it solves.", // TODO: Add description
-    tech: ["React", "TypeScript", "Node.js", "PostgreSQL"], // TODO: Add tech stack
-    liveUrl: "https://project.com", // TODO: Add live URL
-    repoUrl: "https://github.com/yashoza19/project", // TODO: Add repo URL
-    image: "/images/projects/project-1.jpg", // TODO: Add project image to /public/images/projects/
+    title: "AI Quickstarts on OpenShift",
+    description: "Open-source reference architectures for deploying AI applications (RAG pipelines, LLM agents, transaction monitoring) on OpenShift AI with containerized microservices and Kafka event streaming.",
+    tech: ["Kubernetes", "OpenShift", "Python", "Kafka", "Docker", "Helm"],
+    repoUrl: "https://github.com/yashoza19",
+    image: "/images/projects/ai-quickstarts.jpg",
     featured: true,
   },
   {
-    title: "Another Project",
-    description: "Another interesting project that showcases different skills.",
-    tech: ["Next.js", "Tailwind CSS", "Firebase"],
-    liveUrl: "https://another-project.com",
-    repoUrl: "https://github.com/yashoza19/another-project",
-    image: "/images/projects/project-2.jpg",
+    title: "OpenShift Preflight Certification",
+    description: "Contributed to certification tooling that validates container images and Kubernetes operators against Red Hat compliance standards. Built pipeline alerting for failure remediation across 10+ repos.",
+    tech: ["Go", "Kubernetes", "Jenkins", "GitHub Actions", "Docker"],
+    repoUrl: "https://github.com/yashoza19",
+    image: "/images/projects/preflight.jpg",
     featured: true,
   },
   {
-    title: "Side Project",
-    description: "A side project built to explore new technologies.",
-    tech: ["Vue.js", "Express", "MongoDB"],
-    liveUrl: "https://side-project.com",
-    repoUrl: "https://github.com/yashoza19/side-project",
-    image: "/images/projects/project-3.jpg",
+    title: "Kubernetes Microservices App",
+    description: "High-availability Kubernetes cluster on AWS using kops, with containerized frontend/backend services, Jenkins CI/CD on EC2, and Ansible-based configuration management.",
+    tech: ["Kubernetes", "AWS", "Docker", "Jenkins", "Ansible", "Node.js", "PostgreSQL"],
+    repoUrl: "https://github.com/yashoza19",
+    image: "/images/projects/k8s-microservices.jpg",
+    featured: true,
+  },
+  {
+    title: "Cloud-Based Web Application",
+    description: "Fault-tolerant full-stack app on AWS leveraging EC2, RDS, DynamoDB, S3, Lambda, SNS, Route53, Auto Scaling Groups with CloudFormation IaC and CircleCI/CodeDeploy for continuous delivery.",
+    tech: ["AWS", "CloudFormation", "Lambda", "DynamoDB", "CircleCI", "CodeDeploy"],
+    repoUrl: "https://github.com/yashoza19",
+    image: "/images/projects/cloud-app.jpg",
+    featured: true,
+  },
+  {
+    title: "MRI Management Platform",
+    description: "Cloud-based clinical research platform on AWS with containerized React/Flask services on ECS, zero-downtime deployments, and end-to-end CI/CD via CodePipeline.",
+    tech: ["AWS", "Docker", "ECS", "React", "Flask", "CloudFormation", "CodePipeline"],
+    repoUrl: "https://github.com/yashoza19",
+    image: "/images/projects/mri-platform.jpg",
+    featured: true,
+  },
+  {
+    title: "Serverless Messaging App",
+    description: "Real-time serverless messaging application using AWS Lambda, API Gateway, and Django with JWT authentication and session management.",
+    tech: ["AWS Lambda", "API Gateway", "Django", "Python", "JWT"],
+    repoUrl: "https://github.com/yashoza19",
+    image: "/images/projects/serverless-messaging.jpg",
     featured: false,
   },
-  // TODO: Add more projects
 ];
 
 // ============================================================================
 // SKILLS & TECH STACK
 // ============================================================================
-// TODO: Update with actual skills
 
 export const SKILLS = {
-  frontend: [
-    "React",
-    "Next.js",
-    "TypeScript",
-    "Tailwind CSS",
-    "Vue.js",
-    "GSAP",
-    "Framer Motion",
-  ], // TODO: Update frontend skills
-  backend: [
-    "Node.js",
-    "Express",
-    "Python",
-    "Django",
-    "PostgreSQL",
-    "MongoDB",
-    "Redis",
-  ], // TODO: Update backend skills
-  tools: [
-    "Git",
+  "Container & Orchestration": [
+    "Kubernetes",
+    "OpenShift",
     "Docker",
-    "AWS",
-    "Vercel",
-    "Figma",
-    "Jest",
-    "Playwright",
-  ], // TODO: Update tools
+    "Helm",
+    "Multi-cluster management",
+  ],
+  "Cloud (AWS)": [
+    "EC2",
+    "S3",
+    "RDS",
+    "IAM",
+    "VPC",
+    "Lambda",
+    "ECS",
+    "CloudWatch",
+    "Route53",
+    "SNS/SQS",
+    "CodePipeline",
+    "CodeDeploy",
+    "CloudTrail",
+    "Organizations",
+  ],
+  "Infrastructure as Code": [
+    "Terraform",
+    "CloudFormation",
+    "Ansible",
+  ],
+  "CI/CD & Automation": [
+    "Jenkins",
+    "GitHub Actions",
+    "CircleCI",
+    "AWS CodePipeline",
+    "JFrog Artifactory",
+  ],
+  "Networking & Service Mesh": [
+    "Istio",
+    "Container networking",
+    "Overlay networks",
+    "Network policies",
+  ],
+  "Languages": [
+    "Python",
+    "Bash",
+    "Java",
+    "JavaScript",
+    "Node.js",
+    "Go",
+  ],
+  "Monitoring & Observability": [
+    "CloudWatch",
+    "Pipeline alerting",
+    "Failure diagnostics",
+  ],
+  "Event Streaming": [
+    "Kafka",
+    "SNS/SQS",
+  ],
+  "Tools": [
+    "Git",
+    "Postman",
+    "Confluence",
+    "VS Code",
+    "Jupyter",
+  ],
 };
 
 // ============================================================================
 // STATS (for About section)
 // ============================================================================
-// TODO: Update with real stats
 
 export const STATS = {
-  yearsExperience: 3, // TODO: Update
-  projectsCompleted: 25, // TODO: Update
-  technologiesMastered: 20, // TODO: Update
-  coffeeConsumed: "∞", // TODO: Update or keep as is
+  yearsExperience: 5,
+  partnerCertifications: 100,
+  engineersMentored: 15,
+  referenceArchitectures: 10,
 };
+
+// ============================================================================
+// EDUCATION
+// ============================================================================
+
+export const EDUCATION = [
+  {
+    degree: "Master of Science, Information Systems",
+    institution: "Northeastern University",
+    location: "Boston, MA",
+    date: "August 2020",
+  },
+  {
+    degree: "Bachelor of Technology, Information Technology",
+    institution: "Nirma University",
+    location: "Ahmedabad, India",
+    date: "May 2018",
+  },
+];
+
+// ============================================================================
+// CERTIFICATIONS
+// ============================================================================
+
+export const CERTIFICATIONS = [
+  "AWS Solutions Architect Associate",
+  "Red Hat Certified System Administrator (RHCSA)",
+];
 
 // ============================================================================
 // NAVIGATION

@@ -55,26 +55,14 @@ export default function Skills() {
 
           {/* Skills Categories */}
           <div className="space-y-16">
-            {/* Frontend */}
-            <SkillCategory
-              title="Frontend"
-              skills={SKILLS.frontend}
-              direction="left"
-            />
-
-            {/* Backend */}
-            <SkillCategory
-              title="Backend"
-              skills={SKILLS.backend}
-              direction="right"
-            />
-
-            {/* Tools */}
-            <SkillCategory
-              title="Tools & Others"
-              skills={SKILLS.tools}
-              direction="left"
-            />
+            {Object.entries(SKILLS).map(([category, skills], index) => (
+              <SkillCategory
+                key={category}
+                title={category}
+                skills={skills}
+                direction={index % 2 === 0 ? "left" : "right"}
+              />
+            ))}
           </div>
         </div>
       </div>

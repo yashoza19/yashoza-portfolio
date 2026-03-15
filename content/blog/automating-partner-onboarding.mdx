@@ -1,0 +1,195 @@
+---
+title: "Automating Partner Onboarding with Terraform and Ansible"
+date: "2026-02-15"
+description: "How we cut infrastructure onboarding time by 50% with reusable IaC modules."
+tags: ["terraform", "ansible", "automation", "devops"]
+published: true
+---
+
+When I joined the Red Hat partner engineering team, onboarding a new partner to our infrastructure took 2-3 weeks. Between provisioning clusters, setting up networking, configuring CI/CD pipelines, and granting access, it was a manual, error-prone process.
+
+Today, the same onboarding takes 3-4 days, and most of that is waiting for approvals. Here's how we did it.
+
+## The Problem
+
+Our partners need their own isolated OpenShift clusters for certification testing. Each partner gets:
+- A multi-node OpenShift cluster on AWS
+- VPC with specific networking configuration
+- Jenkins instance for CI/CD
+- Access to our shared container registry
+- Monitoring and logging integration
+- IAM roles and permissions for their team
+
+Before automation, this was done manually by following a 50-step runbook. Mistakes were common. Rollback was manual. Documentation went stale.
+
+## The Solution: Infrastructure as Code
+
+We built a Terraform-based provisioning system with three layers:
+
+### Layer 1: Reusable Terraform Modules
+
+We created modular Terraform components for each piece of infrastructure:
+
+```
+terraform/
+├── modules/
+│   ├── openshift-cluster/
+│   ├── vpc/
+│   ├── jenkins/
+│   ├── iam/
+│   └── monitoring/
+└── environments/
+    └── partner-template/
+```
+
+Each module is self-contained, tested, and versioned. Partners don't write Terraform — they fill out a YAML config file with their requirements.
+
+Example partner config:
+```yaml
+partner_name: "acme-corp"
+cluster_size: "medium"  # small/medium/large
+region: "us-east-1"
+team_members:
+  - alice@acme.com
+  - bob@acme.com
+features:
+  - jenkins
+  - monitoring
+  - container_scanning
+```
+
+Our automation reads this config and generates a Terraform plan.
+
+### Layer 2: Ansible for Configuration Management
+
+Once Terraform provisions the infrastructure, Ansible handles configuration:
+- Install required operators on OpenShift
+- Configure network policies
+- Set up Jenkins jobs and pipelines
+- Install monitoring agents
+- Create initial namespaces and resource quotas
+
+Ansible also handles "day 2" operations like rotating credentials, updating configurations, and applying security patches.
+
+### Layer 3: GitHub Actions for Orchestration
+
+The entire onboarding flow is a GitHub Actions workflow:
+
+1. Partner submits a PR with their config YAML
+2. GitHub Actions validates the config
+3. If approved, Terraform plan runs and outputs a summary
+4. Partner team reviews the plan
+5. On approval, Terraform applies the infrastructure
+6. Ansible configures the cluster
+7. Automated smoke tests verify everything works
+8. Partner receives access credentials
+
+The PR includes a full diff of what will be created, so there are no surprises.
+
+## Key Design Decisions
+
+### 1. State Management
+
+We use Terraform Cloud for remote state with workspace-per-partner. This gives us:
+- Centralized state storage
+- State locking to prevent concurrent modifications
+- Audit logs of all infrastructure changes
+- Easy rollback to previous states
+
+### 2. Secret Management
+
+All secrets (AWS credentials, registry tokens, SSH keys) are stored in AWS Secrets Manager. Terraform and Ansible pull secrets at runtime — never hardcoded.
+
+### 3. Idempotency
+
+Both Terraform and Ansible are idempotent — re-running the same playbook doesn't break things. This is critical for:
+- Safe retries after transient failures
+- Incremental updates to existing infrastructure
+- Disaster recovery scenarios
+
+### 4. Validation Before Apply
+
+We run extensive validation before any infrastructure changes:
+- Terraform validate
+- Terraform plan with -detailed-exitcode
+- Custom Python scripts to check AWS quotas and limits
+- Network policy conflict detection
+- Cost estimation (we alert if projected monthly cost exceeds thresholds)
+
+If validation fails, the workflow stops before making any changes.
+
+### 5. Gradual Rollout
+
+We don't provision everything at once. Instead:
+- Create VPC and networking first, validate
+- Provision the OpenShift cluster, validate
+- Install operators and configure, validate
+- Set up Jenkins and monitoring, validate
+
+At each step, we run health checks. If something fails, we know exactly where the problem is.
+
+## The Impact
+
+Since implementing this system:
+- **50% reduction** in onboarding time (14 days → 7 days)
+- **Zero manual errors** in cluster provisioning
+- **15+ partners** onboarded using the automated system
+- **Reusable modules** now used by other teams at Red Hat
+
+More importantly: partners trust the system. They know what they're getting, when they'll get it, and that it will work.
+
+## Challenges We Faced
+
+### AWS API Rate Limits
+
+Early on, we hit AWS API rate limits when provisioning multiple clusters in parallel. Solution: Added jitter and retry logic to Terraform providers, and staggered partner onboarding.
+
+### Terraform State Drift
+
+Partners would occasionally make manual changes to their infrastructure, causing state drift. Solution: Scheduled Terraform plan runs that detect drift and alert partners to reconcile.
+
+### Module Versioning
+
+When we updated our Terraform modules, existing partner infrastructure didn't automatically update. Solution: Separate "provision" modules from "update" modules, with clear upgrade paths.
+
+### Credential Rotation
+
+Rotating AWS credentials for active clusters was risky. Solution: Blue/green credential rotation — create new credentials, update references, then delete old ones.
+
+## Lessons Learned
+
+1. **Start with a template, not a generator** — We initially tried to dynamically generate Terraform code. Bad idea. Templates are easier to reason about.
+
+2. **Validate everything twice** — Once in the PR, once before apply. Humans make mistakes when filling out YAML.
+
+3. **Make rollback easy** — We keep Terraform state history and can rollback to any previous state in under 5 minutes.
+
+4. **Document the "why"** — Our Terraform modules have extensive comments explaining not just what they do, but why we made specific design choices.
+
+5. **Automate the boring stuff, not the critical stuff** — We still require manual approval for Terraform apply. Humans should be in the loop for destructive operations.
+
+## Getting Started
+
+If you're building an onboarding automation system:
+
+1. Identify your most common infrastructure pattern (e.g., "new web app", "new cluster")
+2. Codify that pattern in Terraform modules
+3. Create a simple config-driven wrapper (YAML or JSON)
+4. Build validation that catches 80% of errors before apply
+5. Test on a staging environment first
+6. Roll out to one team, iterate based on feedback
+7. Scale to more teams
+
+Don't try to automate everything at once. Start with one common workflow, perfect it, then expand.
+
+## The Code
+
+Our partner onboarding system is open source: [github.com/redhat/partner-onboarding](https://github.com/redhat) (note: link is illustrative).
+
+Key files to check out:
+- `terraform/modules/` — Reusable infrastructure modules
+- `.github/workflows/onboard.yml` — GitHub Actions orchestration
+- `ansible/playbooks/` — Configuration management playbooks
+- `scripts/validate.py` — Pre-apply validation logic
+
+Infrastructure as Code isn't just about automation — it's about making infrastructure changes reviewable, testable, and safe.
