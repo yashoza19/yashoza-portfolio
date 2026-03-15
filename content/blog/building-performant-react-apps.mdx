@@ -1,0 +1,109 @@
+---
+title: "Building Performant React Applications"
+date: "2026-02-15"
+description: "A deep dive into performance optimization techniques for React applications, from code splitting to lazy loading and beyond."
+tags: ["react", "performance", "webdev", "typescript"]
+published: true
+---
+
+Performance is critical for modern web applications. Users expect instant interactions, and every millisecond counts. In this post, I'll share techniques I've used to optimize React applications at scale.
+
+## The Performance Mindset
+
+Before diving into specific techniques, it's important to adopt a performance-first mindset. This means:
+
+- Measuring before optimizing
+- Understanding your performance budget
+- Profiling real user experiences
+- Making data-driven decisions
+
+<Callout type="tip" title="Pro Tip">
+Use Chrome DevTools Performance tab and React DevTools Profiler to identify bottlenecks before attempting optimizations.
+</Callout>
+
+## Code Splitting with React.lazy()
+
+One of the most effective ways to improve initial load time is code splitting. React makes this easy with `React.lazy()`:
+
+```tsx
+import { lazy, Suspense } from 'react';
+
+const Dashboard = lazy(() => import('./Dashboard'));
+
+function App() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <Dashboard />
+    </Suspense>
+  );
+}
+```
+
+This technique ensures that the Dashboard component is only loaded when it's actually needed, reducing your initial bundle size.
+
+## Memoization Strategies
+
+React provides several hooks for memoization:
+
+### useMemo for expensive calculations
+
+```tsx
+const expensiveValue = useMemo(() => {
+  return computeExpensiveValue(a, b);
+}, [a, b]);
+```
+
+### useCallback for function references
+
+```tsx
+const handleClick = useCallback(() => {
+  doSomething(a, b);
+}, [a, b]);
+```
+
+### React.memo for component re-renders
+
+```tsx
+const MemoizedComponent = React.memo(({ data }) => {
+  return <ExpensiveRender data={data} />;
+});
+```
+
+<Callout type="warning" title="Don't Over-Optimize">
+Memoization has a cost. Only use it when profiling shows it provides a meaningful benefit. Premature optimization can make your code harder to maintain.
+</Callout>
+
+## Virtual Scrolling
+
+For large lists, virtual scrolling renders only visible items:
+
+```tsx
+import { FixedSizeList } from 'react-window';
+
+function LargeList({ items }) {
+  return (
+    <FixedSizeList
+      height={600}
+      itemCount={items.length}
+      itemSize={50}
+      width="100%"
+    >
+      {({ index, style }) => (
+        <div style={style}>
+          {items[index].name}
+        </div>
+      )}
+    </FixedSizeList>
+  );
+}
+```
+
+## Key Takeaways
+
+1. **Measure first** - Use profiling tools to identify real bottlenecks
+2. **Code split** - Load only what you need, when you need it
+3. **Memoize wisely** - Not everything needs to be memoized
+4. **Virtual scroll** - Handle large lists efficiently
+5. **Monitor production** - Use real user monitoring (RUM) tools
+
+Performance optimization is an ongoing process. Start with the techniques that provide the most impact for your specific use case, and continuously measure and iterate.
