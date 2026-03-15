@@ -153,6 +153,43 @@ html.lenis {
   padding: var(--section-padding) 0;
 }
 
+/* Container Custom - with responsive padding */
+.container-custom {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem; /* 24px */
+  padding-right: 1.5rem; /* 24px */
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding-left: 2rem; /* 32px */
+    padding-right: 2rem; /* 32px */
+  }
+}
+
+@media (min-width: 768px) {
+  .container-custom {
+    padding-left: 3rem; /* 48px */
+    padding-right: 3rem; /* 48px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    max-width: 1280px;
+    padding-left: 4rem; /* 64px */
+    padding-right: 4rem; /* 64px */
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-custom {
+    max-width: 1400px;
+  }
+}
+
 /* Magnetic Effect Base */
 .magnetic {
   transition: transform 0.4s var(--ease-power3);

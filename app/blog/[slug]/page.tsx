@@ -98,7 +98,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </header>
 
               {/* Article Content */}
-              <article className="prose prose-invert prose-lg max-w-none">
+              <article className="prose prose-lg max-w-none prose-headings:font-display prose-p:text-[var(--color-text)] prose-p:leading-relaxed">
                 <MDXRemote
                   source={post.content}
                   components={MDXComponents}
