@@ -28,15 +28,32 @@ After the initial deployment, you need three values from Vercel:
    - Name it "GitHub Actions Deployment"
    - Copy the token (you won't see it again)
 
-2. **Organization ID**:
-   - Go to your Vercel dashboard
-   - Settings → General
-   - Copy the "Organization ID"
+2. **Organization ID** (easiest method):
+   - Go to your Vercel project dashboard
+   - Click on "Settings" tab
+   - Click on "General" in the left sidebar
+   - Scroll down to find your **Team ID** or **User ID** - this is your Organization ID
+   - If you don't see it there, use the CLI method below
+
+   **Alternative method using CLI**:
+   ```bash
+   # Login to Vercel
+   vercel login
+
+   # Link your project (navigate to project directory first)
+   vercel link
+
+   # After linking, the .vercel/project.json file will contain both IDs
+   cat .vercel/project.json
+   ```
+
+   The `orgId` field is your Organization ID.
 
 3. **Project ID**:
-   - Open your project in Vercel
+   - Open your project in Vercel dashboard
    - Settings → General
-   - Copy the "Project ID"
+   - Scroll down to find "Project ID"
+   - Copy the alphanumeric string
 
 ### 3. Add GitHub Secrets
 
