@@ -7,6 +7,7 @@ import { getPostBySlug, getAllPosts, getAdjacentPosts, formatDate } from '@/lib/
 import MDXComponents from '@/components/blog/MDXComponents';
 import TableOfContents from '@/components/blog/TableOfContents';
 import ReadingProgress from '@/components/blog/ReadingProgress';
+import BlogPostAnalytics from '@/components/blog/BlogPostAnalytics';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -54,6 +55,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <>
+      <BlogPostAnalytics slug={slug} title={post.title} />
       <ReadingProgress />
       <div className="min-h-screen bg-background pt-32 pb-20">
         <div className="container-custom">

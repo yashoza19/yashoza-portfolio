@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { track } from "@vercel/analytics";
 import { PROJECTS } from "@/lib/constants";
 import Image from "next/image";
 
@@ -214,6 +215,7 @@ function ProjectCard({ project }: ProjectCardProps) {
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => track("project_clicked", { project: project.title, type: "live" })}
               className="text-sm text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors duration-300 flex items-center gap-2"
             >
               <span>Live Demo</span>
@@ -227,6 +229,7 @@ function ProjectCard({ project }: ProjectCardProps) {
               href={project.repoUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => track("project_clicked", { project: project.title, type: "repo" })}
               className="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors duration-300 flex items-center gap-2"
             >
               <span>Code</span>
