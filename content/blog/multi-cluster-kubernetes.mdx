@@ -1,0 +1,126 @@
+---
+title: "Multi-Cluster Kubernetes: What I Wish I Knew Earlier"
+date: "2026-02-28"
+description: "Practical advice on managing multi-cluster Kubernetes environments from someone who's debugged more overlay network issues than they'd like to admit."
+tags: ["kubernetes", "infrastructure", "aws"]
+published: true
+---
+
+Running a single Kubernetes cluster is hard. Running multiple clusters across regions, cloud providers, or on-prem environments? That's a different beast entirely.
+
+At Red Hat, I manage multi-cluster OpenShift environments for our partner ecosystem. Here's what I wish someone had told me before I started.
+
+## Why Multi-Cluster?
+
+Before diving into the complexity, ask yourself: do you actually need multiple clusters?
+
+Valid reasons for multi-cluster:
+- **Geographic distribution** — Low latency for users in different regions
+- **Blast radius reduction** — An incident in one cluster doesn't take down everything
+- **Compliance** — Data residency requirements force you to run clusters in specific locations
+- **Environment isolation** — Dev/staging/prod in separate clusters
+- **Multi-tenancy at the cluster level** — When namespace-level isolation isn't enough
+
+Bad reasons for multi-cluster:
+- "We want to learn multi-cluster" (learn on a side project, not production)
+- "Someone read a blog post about it"
+- "Because microservices" (most apps don't need it)
+
+## The Hard Parts
+
+### 1. Service Discovery Across Clusters
+
+In a single cluster, service discovery is easy — use DNS. In multi-cluster, you need a strategy.
+
+Options I've seen work:
+- **Service mesh** (Istio, Linkerd) — Provides cross-cluster service discovery and traffic routing
+- **External DNS + load balancers** — Expose services via cloud LBs, use external-dns to manage records
+- **API gateway pattern** — All cross-cluster traffic goes through a gateway that handles routing
+
+We use a combination of Istio for mesh-internal traffic and external load balancers for public endpoints.
+
+### 2. Data Replication and Consistency
+
+If your app has state, you need a plan for how data lives across clusters.
+
+For databases:
+- **Active-passive** — One cluster has the primary DB, others fail over to it
+- **Active-active** — Multiple writable replicas (hard, requires careful conflict resolution)
+- **Sharded** — Each cluster owns a subset of the data
+
+We run separate databases per cluster and sync only what's necessary via event streams (Kafka). This avoids the distributed database nightmare.
+
+### 3. Network Policies and Overlay Networks
+
+This is where I spent the most time debugging.
+
+Key lessons:
+- **CNI plugins matter** — Different CNI plugins (Calico, Cilium, Flannel) have different multi-cluster support. Research before you commit.
+- **IP address conflicts** — Make sure your cluster pod/service CIDRs don't overlap. Fixing this later is painful.
+- **Network policy testing** — Set up automated tests for network policies. Manual testing doesn't scale.
+- **Cross-cluster traffic encryption** — Use a service mesh or VPN. Don't send plaintext traffic between clusters.
+
+I once spent three days debugging why services in cluster A couldn't reach cluster B. Turned out the AWS security groups weren't allowing cross-VPC traffic. Always check the basics first.
+
+### 4. Cluster Upgrades and Versioning
+
+Keeping multiple clusters in sync is hard. Letting them drift is dangerous.
+
+Our approach:
+- **Stagger upgrades** — Upgrade dev cluster first, then staging, then prod
+- **Version skew policy** — Allow max 1 minor version difference between clusters
+- **Automated testing between upgrades** — Run integration tests after each cluster upgrade
+- **Rollback plan** — Know how to rollback a cluster upgrade before you start
+
+We use Terraform to manage cluster versions and automated CI/CD pipelines that test each cluster after upgrade.
+
+### 5. Observability and Debugging
+
+When something goes wrong in a multi-cluster environment, you need visibility into all clusters at once.
+
+Must-haves:
+- **Centralized logging** — Send logs from all clusters to one place (we use CloudWatch + S3)
+- **Centralized metrics** — Federated Prometheus or a hosted solution like Datadog
+- **Distributed tracing** — Jaeger or similar to trace requests across cluster boundaries
+- **Cluster health dashboard** — Single pane of glass showing health of all clusters
+
+Pro tip: Tag every log and metric with the cluster name. You'll thank yourself later.
+
+## Tools That Actually Help
+
+- **Terraform** — Infrastructure as Code for provisioning clusters across clouds
+- **Ansible** — Configuration management for post-provision setup
+- **Helm** — Deploy the same charts across all clusters with environment-specific values
+- **ArgoCD** — GitOps-based deployment to multiple clusters from a single control plane
+- **Istio** — Service mesh with multi-cluster support built in
+
+## Common Pitfalls
+
+1. **Assuming identical clusters** — Clusters drift. Automate everything.
+2. **Not testing failover** — If you don't test failover, it won't work when you need it.
+3. **Ignoring costs** — Running multiple clusters is expensive. Monitor your cloud spend.
+4. **Over-optimizing too early** — Start simple, add complexity only when you need it.
+5. **Underestimating operational overhead** — Multi-cluster means multi-oncall. Plan accordingly.
+
+## My Setup at Red Hat
+
+For context, here's what I manage:
+- 10+ OpenShift clusters across AWS regions
+- Mix of development, staging, and production clusters
+- Terraform for provisioning, Ansible for config management
+- Istio for service mesh, Kafka for event streaming
+- Jenkins + GitHub Actions for CI/CD across all clusters
+
+Biggest lesson: Automation is non-negotiable. Manual cluster management doesn't scale past 2-3 clusters.
+
+## Start Here
+
+If you're building your first multi-cluster setup:
+1. Start with two clusters (dev and prod) in the same region
+2. Get service discovery working
+3. Set up centralized logging and metrics
+4. Automate cluster provisioning and configuration
+5. Test failover scenarios regularly
+6. Only then add more clusters
+
+Multi-cluster Kubernetes is powerful but complex. Move deliberately, automate everything, and don't be afraid to ask for help.

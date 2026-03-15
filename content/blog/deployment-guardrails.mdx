@@ -1,0 +1,102 @@
+---
+title: "Why Every Team Needs Deployment Guardrails"
+date: "2026-03-10"
+description: "Lessons learned from building deployment guardrails that eliminated rollback incidents across partner environments."
+tags: ["kubernetes", "devops", "ci-cd"]
+published: true
+---
+
+Over the past few years at Red Hat, I've built and maintained deployment systems that serve hundreds of partners and internal teams. The most impactful change we made wasn't faster pipelines or fancier tooling — it was implementing deployment guardrails that prevent bad deployments before they reach production.
+
+## The Problem: Zero Incident Requirement
+
+When you're managing infrastructure for external partners, rollback incidents aren't just inconvenient — they're contract violations. A failed deployment that causes downtime can break SLAs, damage trust, and in some cases, cost real money.
+
+We needed a system that would catch issues before they reached production, but without slowing down the deployment velocity that our partners depended on.
+
+## What Are Deployment Guardrails?
+
+Deployment guardrails are automated checks and policies that run before and during deployments. Think of them as a safety net that catches common failure modes:
+
+- **Pre-flight validation**: Check that container images exist, configs are valid, and dependencies are available
+- **Resource limits**: Ensure deployments don't request more resources than available in the cluster
+- **Policy enforcement**: Validate against security policies, network policies, and compliance requirements
+- **Progressive rollout**: Deploy to canary environments first, monitor for errors, then proceed to production
+- **Automatic rollback triggers**: Define health metrics that, if violated, trigger immediate rollback
+
+## Building Guardrails That Work
+
+Here's what we implemented at Red Hat for our multi-cluster OpenShift deployments:
+
+### 1. Terraform-Based Pre-Deployment Validation
+
+Before any deployment, we run a Terraform plan that validates:
+- Cluster capacity (CPU, memory, storage)
+- Network policy compatibility
+- Required secrets and ConfigMaps exist
+- Image pull policies and registry access
+
+This caught roughly 30% of would-be failures before they even started.
+
+### 2. Admission Controllers for Runtime Validation
+
+We use Kubernetes admission controllers to enforce policies at deployment time:
+- Resource quotas and limit ranges
+- Pod security standards
+- Image signature verification
+- Network policy requirements
+
+These are non-negotiable — if a deployment violates policy, it doesn't proceed.
+
+### 3. Canary Deployments with Automated Health Checks
+
+Every production deployment goes through a canary phase:
+- Deploy to 10% of pods
+- Monitor error rates, latency, resource usage for 10 minutes
+- If metrics stay green, proceed to full rollout
+- If metrics degrade, automatic rollback
+
+We integrated this with our existing Jenkins pipelines using custom scripts that poll Prometheus metrics.
+
+### 4. Post-Deployment Smoke Tests
+
+After deployment completes, we run automated smoke tests:
+- HTTP health checks for all services
+- Database connectivity tests
+- Integration tests for critical workflows
+- Resource utilization checks
+
+If any smoke test fails, we immediately roll back.
+
+## The Impact
+
+Since implementing these guardrails:
+- **Zero rollback incidents** in partner environments over 18 months
+- **40% reduction** in certification pipeline failure remediation time
+- **50% faster** partner onboarding (because they trust the system)
+- **15+ engineers** trained on the guardrail system, spreading best practices
+
+## Lessons Learned
+
+1. **Make guardrails fast** — If validation takes 20 minutes, people will find ways to skip it. Our entire pre-flight check runs in under 2 minutes.
+
+2. **Fail early and loudly** — A clear error message at the start of a deployment is infinitely better than a mysterious failure 30 minutes in.
+
+3. **Monitor everything** — You can't build automatic rollback triggers without good observability. Invest in your metrics and logging infrastructure.
+
+4. **Document the "why"** — When a guardrail blocks a deployment, the error message should explain why and how to fix it. This turns frustration into learning.
+
+5. **Start simple** — We didn't build this system overnight. We started with basic resource checks and layered on complexity as we learned what actually caused failures.
+
+## Getting Started
+
+If you're building deployment guardrails for your team, start here:
+
+1. Analyze your last 20 deployment failures — what could have been caught automatically?
+2. Implement one guardrail that prevents the most common failure
+3. Measure the impact (failures prevented, time saved)
+4. Iterate and add more guardrails
+
+The goal isn't to build a perfect system on day one. The goal is to make your deployments incrementally safer and your team incrementally more confident.
+
+Guardrails aren't about slowing teams down — they're about letting teams move fast without breaking things.

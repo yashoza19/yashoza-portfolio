@@ -125,10 +125,11 @@ export default function About() {
               }}
               className="text-lg md:text-xl text-[var(--color-text)] leading-relaxed"
             >
-              I'm a passionate developer who believes that great code is not
-              just functional—it's elegant, maintainable, and user-centered.
-              With a focus on modern web technologies, I craft digital
-              experiences that are both beautiful and performant.
+              I'm a Senior DevOps Engineer with 5+ years of experience building
+              and operating scalable Kubernetes-based infrastructure, CI/CD
+              systems, and cloud-native platforms on AWS. I specialize in
+              container orchestration, multi-cluster Kubernetes environments,
+              and infrastructure automation using Terraform and CloudFormation.
             </p>
 
             <p
@@ -137,9 +138,10 @@ export default function About() {
               }}
               className="text-lg md:text-xl text-[var(--color-muted)] leading-relaxed"
             >
-              My journey in tech has been driven by curiosity and a commitment
-              to continuous learning. I thrive on solving complex problems and
-              transforming ideas into reality through clean, efficient code.
+              I've mentored 15+ engineers, driven technical roadmaps, and
+              designed deployment guardrails that enable hundreds of developers
+              to ship safely at high velocity. Currently at Red Hat, working on
+              AI application deployment and developer platform engineering.
             </p>
 
             <p
@@ -148,9 +150,9 @@ export default function About() {
               }}
               className="text-lg md:text-xl text-[var(--color-muted)] leading-relaxed"
             >
-              When I'm not coding, you'll find me exploring new frameworks,
-              contributing to open source, or sharing knowledge with the
-              developer community.
+              When I'm not architecting infrastructure, you'll find me
+              contributing to open source, exploring new cloud-native
+              technologies, or sharing knowledge with the DevOps community.
             </p>
           </div>
 
@@ -194,19 +196,19 @@ export default function About() {
             suffix="+"
           />
           <StatCard
-            value={STATS.projectsCompleted}
-            label="Projects Completed"
+            value={STATS.partnerCertifications}
+            label="Partner Certifications"
             suffix="+"
           />
           <StatCard
-            value={STATS.technologiesMastered}
-            label="Technologies"
+            value={STATS.engineersMentored}
+            label="Engineers Mentored"
             suffix="+"
           />
           <StatCard
-            value={STATS.coffeeConsumed}
-            label="Coffee Consumed"
-            suffix=""
+            value={STATS.referenceArchitectures}
+            label="Reference Architectures"
+            suffix="+"
           />
         </div>
         </div>
