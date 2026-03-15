@@ -19,6 +19,12 @@ export default function BlogPreviewClient({ posts }: BlogPreviewClientProps) {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    if (prefersReducedMotion) return;
+
     const section = sectionRef.current;
     const heading = headingRef.current;
     const cards = cardsRef.current;

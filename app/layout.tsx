@@ -19,14 +19,54 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Yash Oza | Full Stack Developer",
-  description: "Portfolio of Yash Oza - Full Stack Developer crafting exceptional web experiences",
-  keywords: ["web developer", "full stack", "react", "nextjs", "portfolio"],
-  authors: [{ name: "Yash Oza" }],
+  metadataBase: new URL('https://yashoza-portfolio.vercel.app'),
+  title: {
+    default: "Yash Oza | Full Stack Developer",
+    template: "%s | Yash Oza"
+  },
+  description: "Portfolio of Yash Oza - Full Stack Developer crafting exceptional web experiences with React, Next.js, TypeScript, and modern web technologies.",
+  keywords: [
+    "Yash Oza",
+    "full stack developer",
+    "web developer",
+    "react developer",
+    "nextjs developer",
+    "typescript",
+    "portfolio",
+    "software engineer",
+    "frontend developer",
+    "backend developer",
+  ],
+  authors: [{ name: "Yash Oza", url: "https://yashoza-portfolio.vercel.app" }],
+  creator: "Yash Oza",
+  publisher: "Yash Oza",
   openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://yashoza-portfolio.vercel.app",
+    title: "Yash Oza | Full Stack Developer",
+    description: "Portfolio of Yash Oza - Full Stack Developer crafting exceptional web experiences with React, Next.js, TypeScript, and modern web technologies.",
+    siteName: "Yash Oza Portfolio",
+  },
+  twitter: {
+    card: "summary_large_image",
     title: "Yash Oza | Full Stack Developer",
     description: "Portfolio of Yash Oza - Full Stack Developer crafting exceptional web experiences",
-    type: "website",
+    creator: "@yourusername",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-code',
   },
 };
 
