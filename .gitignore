@@ -41,4 +41,3 @@ next-env.d.ts
 .playwright-mcp/
 PROMPT.md
 CLAUDE.md
-tailwind.config.js
