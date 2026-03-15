@@ -1,0 +1,360 @@
+---
+title: "Deploying AI Virtual Agents on OpenShift with LlamaStack"
+date: "2026-03-15"
+description: "How we built a production-ready platform for deploying conversational AI agents with knowledge bases, tools, and guardrails on Kubernetes."
+tags: ["openshift", "kubernetes", "ai", "llm", "agents", "devops"]
+published: true
+readingTime: "8 min"
+---
+
+Most teams treat AI deployment as a data science problem. It's not. Once the model works in a notebook, the real challenge is running it reliably on Kubernetes — with proper networking, storage, scaling, and security. That's the gap we set out to close.
+
+We built [ai-virtual-agent](https://github.com/rh-ai-quickstart/ai-virtual-agent), an open-source platform for deploying conversational AI agents on OpenShift AI. Agents can access knowledge bases via RAG, call external tools through the Model Context Protocol (MCP), and apply safety guardrails — all running on a Kubernetes-native architecture.
+
+## Why This Matters for Platform Engineers
+
+LLMs are no longer experimental. Teams across the organization want to deploy them. Without a standardized platform, you end up with five different teams running five different inference stacks, none of them production-hardened.
+
+This project gives platform teams a repeatable, Helm-based deployment that handles model serving (vLLM), vector storage (PostgreSQL + pgvector), document ingestion (Kubeflow Pipelines), and a React + FastAPI application layer — all in a single namespace.
+
+## Architecture at a Glance
+
+The stack breaks down into four layers:
+
+### Inference Layer
+
+**vLLM** serves the LLM (Llama 3.2) behind KServe, handling GPU scheduling and autoscaling. A separate model server can optionally run Llama Guard for safety filtering.
+
+Key benefits:
+- GPU scheduling managed by Kubernetes tolerations and node affinity
+- Autoscaling based on GPU utilization metrics
+- Separation of inference from application logic
+
+### Data Layer
+
+**PostgreSQL with pgvector** stores both application data and vector embeddings. Documents are processed through a Kubeflow pipeline that chunks, embeds, and indexes content into the vector store.
+
+This enables:
+- Retrieval-Augmented Generation (RAG) for knowledge bases
+- Persistent chat history and session management
+- Efficient similarity search for relevant context
+
+### Application Layer
+
+A **FastAPI backend** manages agents, chat sessions, and knowledge bases. A **React frontend** (built with PatternFly) provides the user interface. OAuth handles authentication on OpenShift.
+
+The API handles:
+- Agent lifecycle management
+- Chat session orchestration
+- Knowledge base CRUD operations
+- Tool invocation coordination
+
+### Tooling Layer
+
+Agents can call external services through **Model Context Protocol (MCP)** servers — web search, database queries, custom APIs — making them more than just chat interfaces.
+
+MCP provides:
+- Standardized protocol for tool integration
+- Plugin architecture without core platform changes
+- Partner extensibility for custom integrations
+
+## Deployment: One Make Command
+
+The deployment is wrapped in a Makefile backed by Helm charts:
+
+```bash
+cd deploy/cluster
+make install NAMESPACE=virtual-agent
+```
+
+This provisions the full stack:
+- Model servers (vLLM + optional Llama Guard)
+- PostgreSQL database with pgvector extension
+- Application pods (FastAPI + React)
+- OpenShift routes for external access
+- RBAC policies and service accounts
+- Persistent Volume Claims for model storage
+
+The interactive installer prompts for:
+- Hugging Face token for model downloads
+- Cluster-specific configuration (GPU node selectors, storage classes)
+- Optional features (Llama Guard, custom MCP servers)
+
+Teardown is equally clean:
+
+```bash
+make uninstall NAMESPACE=virtual-agent
+```
+
+This removes all resources provisioned by the Helm charts, including PVCs.
+
+## Key Technical Decisions
+
+### GPU Scheduling is the Bottleneck
+
+Model servers need tolerations and node affinity for GPU nodes. If your cluster has mixed node types, get your taint/toleration strategy right before anything else.
+
+Our vLLM deployment manifest:
+
+```yaml
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+nodeSelector:
+  node.kubernetes.io/instance-type: g4dn.xlarge
+```
+
+Without proper tolerations, GPU pods get stuck in `Pending` state. Test your node selectors in a dev namespace first.
+
+### Separate Inference from Application Logic
+
+KServe handles model serving independently from the FastAPI app. This means you can scale inference pods based on GPU utilization while scaling app pods based on HTTP traffic — different scaling signals, different autoscalers.
+
+**Inference autoscaling (GPU-based):**
+```yaml
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: nvidia.com/gpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+```
+
+**Application autoscaling (HTTP-based):**
+```yaml
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "100"
+```
+
+### MCP is the Real Unlock
+
+Connecting agents to tools (databases, APIs, search) through a standardized protocol means you're not hardcoding integrations. Partners can plug in their own MCP servers without touching the core platform.
+
+Example MCP server configuration:
+
+```json
+{
+  "mcpServers": {
+    "web-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "database": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}"
+      }
+    }
+  }
+}
+```
+
+Agents automatically discover available tools from registered MCP servers. No code changes required to add new capabilities.
+
+### Guardrails Aren't Optional
+
+Running Llama Guard as a sidecar safety model adds latency (typically 50-100ms), but it catches harmful inputs before they reach the main LLM. In production environments serving external users, this is non-negotiable.
+
+Llama Guard filters:
+- Hate speech and harassment
+- Self-harm content
+- Violence and illegal activities
+- Privacy violations (PII exposure)
+- Prompt injection attempts
+
+Safety check flow:
+1. User input → Llama Guard (safety classification)
+2. If safe → Main LLM (response generation)
+3. LLM response → Llama Guard (output safety check)
+4. If safe → Return to user
+
+The added latency is worth it. One harmful output can destroy user trust and create legal liability.
+
+## Performance Considerations
+
+### Model Loading Time
+
+vLLM can take 2-3 minutes to load large models (7B+ parameters) into GPU memory on cold start. Use readiness probes with sufficient `initialDelaySeconds`:
+
+```yaml
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 180
+  periodSeconds: 10
+```
+
+For production, keep at least one warm replica running to avoid cold start penalties.
+
+### Vector Search Optimization
+
+PostgreSQL + pgvector works well up to ~1M embeddings. Beyond that, consider:
+- Partitioning by knowledge base ID
+- Using HNSW index instead of IVFFlat for better recall
+- Offloading to dedicated vector DB (Milvus, Qdrant) if search latency > 100ms
+
+Our pgvector index configuration:
+
+```sql
+CREATE INDEX ON embeddings
+USING hnsw (embedding vector_cosine_ops)
+WITH (m = 16, ef_construction = 64);
+```
+
+### GPU Memory Management
+
+Llama 3.2 (7B model) requires ~16GB GPU memory with FP16 precision. For multi-tenant environments, use vLLM's prefix caching to share KV cache across requests:
+
+```bash
+--enable-prefix-caching \
+--max-model-len 4096 \
+--gpu-memory-utilization 0.9
+```
+
+This allows 70-80% memory savings when multiple users ask similar questions.
+
+## Challenges We Faced
+
+### KServe CRD Conflicts
+
+OpenShift AI pre-installs KServe, but the version might conflict with your Helm chart dependencies. We pinned KServe to v0.11.x and disabled auto-updates:
+
+```yaml
+kserve:
+  enabled: true
+  version: "0.11.2"
+  controller:
+    image: kserve/kserve-controller:v0.11.2
+```
+
+Always check `oc get crd` before installing to avoid CRD version mismatches.
+
+### OAuth Redirect URIs
+
+OpenShift OAuth requires exact redirect URI matches. Wildcards don't work. If your route is `https://agents.apps.cluster.example.com`, register:
+
+```yaml
+redirectURIs:
+  - https://agents.apps.cluster.example.com/oauth/callback
+```
+
+Not:
+- `https://*.apps.cluster.example.com/oauth/callback` ❌
+- `https://agents.apps.cluster.example.com/*` ❌
+
+### Persistent Storage for Models
+
+Hugging Face model downloads are large (5-10GB). Don't store them in ephemeral container storage. Use a PVC:
+
+```yaml
+volumes:
+  - name: model-cache
+    persistentVolumeClaim:
+      claimName: model-cache-pvc
+volumeMounts:
+  - name: model-cache
+    mountPath: /root/.cache/huggingface
+```
+
+This prevents re-downloading models on every pod restart.
+
+## Production Checklist
+
+Before deploying to production:
+
+- [ ] GPU node taints and tolerations configured correctly
+- [ ] Llama Guard enabled for safety filtering
+- [ ] OAuth configured with correct redirect URIs
+- [ ] Model cache PVC provisioned (10-20GB minimum)
+- [ ] Resource limits set on all pods
+- [ ] Network policies restrict inter-pod communication
+- [ ] Secrets managed via external secret store (Vault, AWS Secrets Manager)
+- [ ] Readiness and liveness probes configured
+- [ ] Horizontal Pod Autoscaling enabled for application tier
+- [ ] Monitoring and alerting configured (Prometheus + Grafana)
+- [ ] Backup strategy for PostgreSQL database
+- [ ] Rate limiting configured on API endpoints
+
+## Try It Yourself
+
+The project is open source under MIT: [github.com/rh-ai-quickstart/ai-virtual-agent](https://github.com/rh-ai-quickstart/ai-virtual-agent)
+
+### Prerequisites
+
+- OpenShift cluster with GPU nodes (NVIDIA A10, T4, or better)
+- OpenShift AI operator installed
+- `oc` CLI authenticated to your cluster
+- Hugging Face account with access to Llama models
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/rh-ai-quickstart/ai-virtual-agent.git
+cd ai-virtual-agent
+
+# Navigate to deployment directory
+cd deploy/cluster
+
+# Run the installer
+make install NAMESPACE=virtual-agent
+
+# Follow the prompts to configure:
+# - Hugging Face token
+# - GPU node selector
+# - Storage class
+# - Optional features (Llama Guard, MCP servers)
+
+# Check deployment status
+oc get pods -n virtual-agent
+oc get routes -n virtual-agent
+
+# Access the UI
+# Open the route URL in your browser
+```
+
+### Running on Vanilla Kubernetes
+
+If you're running vanilla Kubernetes instead of OpenShift, the Helm charts are a solid starting point. You'll need to swap out:
+
+- **Routes** → Ingress resources
+- **OpenShift OAuth** → OIDC provider (Keycloak, Auth0, etc.)
+- **Security Context Constraints** → Pod Security Standards
+
+The core components (vLLM, PostgreSQL, FastAPI, React) are platform-agnostic.
+
+## What's Next
+
+We're actively working on:
+
+- **Multi-tenancy**: Namespace isolation for different teams
+- **Agent marketplace**: Pre-built agents for common use cases (customer support, documentation search, code review)
+- **Observability**: Distributed tracing for agent tool calls (OpenTelemetry integration)
+- **Cost optimization**: Spot instance support for GPU nodes, automatic scale-to-zero
+
+If you're deploying LLMs on Kubernetes, this platform solves the production-readiness gap. The data science team builds the models. You deploy them reliably.
+
+---
+
+*Have questions or want to contribute? Open an issue on [GitHub](https://github.com/rh-ai-quickstart/ai-virtual-agent) or reach out on the OpenShift AI community Slack.*
